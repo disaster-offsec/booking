@@ -11,6 +11,11 @@ import (
 )
 
 func Booklist(w http.ResponseWriter, r *http.Request) {
+	if storage.DB == nil {
+		http.Error(w, "database not initialized", http.StatusInternalServerError)
+		return
+	}
+
 	q := r.URL.Query()
 	uid := q.Get("user_id")
 	pid := q.Get("place_id")

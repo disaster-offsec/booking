@@ -9,6 +9,11 @@ import (
 )
 
 func Book(w http.ResponseWriter, r *http.Request) {
+	if storage.DB == nil {
+		http.Error(w, "database not initialized", http.StatusInternalServerError)
+		return
+	}
+
 	query := r.URL.Query()
 	
 	placeID, err := strconv.Atoi(query.Get("place_id"))
