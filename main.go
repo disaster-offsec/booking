@@ -14,6 +14,9 @@ func main() {
 	
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /ping", handlers.Ping)
+	mux.HandleFunc("POST /book", handlers.Book)
+	mux.HandleFunc("GET /booklist", handlers.Booklist)
+
 
 	log.Printf("Server has started on port %s", port)
 	if err := http.ListenAndServe(":" + *port, mux); err != nil {
