@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"booking/internal/models"
 	"booking/internal/storage"
@@ -17,6 +18,19 @@ func Booklist(w http.ResponseWriter, r *http.Request) {
 	if (uid == "" && pid == "") || (uid != "" && pid != "") {
 		http.Error(w, "need exactly one param", http.StatusBadRequest)
 		return
+	}
+
+	if uid != "" {
+		if _, err := strconv.Atoi(uid); err != nil {
+			http.Error(w, "invalid user_id", http.StatusBadRequest)
+			return
+		}
+	}
+	if pid != "" {
+		if _, err := strconv.Atoi(pid); err != nil {
+			http.Error(w, "invalid place_id", http.StatusBadRequest)
+			return
+		}
 	}
 
 	var rows *sql.Rows
