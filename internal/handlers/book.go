@@ -1,4 +1,3 @@
-
 package handlers
 
 import (
@@ -42,11 +41,15 @@ func Book(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var conflict bool
-	storage.DB.QueryRow(`
+	err = storage.DB.QueryRow(`
 		SELECT EXISTS(
 			SELECT 1 FROM bookings 
 			WHERE place_id=$1 AND time_from<$2 AND $3<time_to
 		)`, placeID, to, from).Scan(&conflict)
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
 	
 	if conflict {
 		http.Error(w, "Conflict", http.StatusConflict)
@@ -54,10 +57,14 @@ func Book(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	var id int
-	storage.DB.QueryRow(`
+	err = storage.DB.QueryRow(`
 		INSERT INTO bookings (user_id, place_id, time_from, time_to)
 		VALUES ($1,$2,$3,$4) RETURNING id`,
 		userID, placeID, from, to).Scan(&id)
+	if err != nil {
+		http.Error(w, "db error", http.StatusInternalServerError)
+		return
+	}
 	
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]int{"id": id})
