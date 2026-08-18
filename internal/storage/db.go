@@ -22,6 +22,18 @@ func InitDB(cfg *config.DBConfig) error {
 		return err
 	}
 	
+	if _, err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS bookings (
+			id SERIAL PRIMARY KEY,
+			user_id INTEGER NOT NULL,
+			place_id INTEGER NOT NULL,
+			time_from TIMESTAMP NOT NULL,
+			time_to TIMESTAMP NOT NULL
+		)
+	`); err != nil {
+		return fmt.Errorf("table creation failed: %w", err)
+	}
+
 	DB = db
 	return nil
 }
