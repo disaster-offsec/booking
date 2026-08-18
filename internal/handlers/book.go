@@ -12,11 +12,35 @@ import (
 func Book(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	
-	placeID, _ := strconv.Atoi(query.Get("place_id"))
-	userID, _ := strconv.Atoi(query.Get("user_id"))
-	from, _ := time.Parse(time.RFC3339, query.Get("from"))
-	to, _ := time.Parse(time.RFC3339, query.Get("to"))
+	placeID, err := strconv.Atoi(query.Get("place_id"))
+	if err != nil || placeID <= 0 {
+		http.Error(w, "invalid place_id", http.StatusBadRequest)
+		return
+	}
 	
+	userID, err := strconv.Atoi(query.Get("user_id"))
+	if err != nil || userID <= 0 {
+		http.Error(w, "invalid user_id", http.StatusBadRequest)
+		return
+	}
+	
+	from, err := time.Parse(time.RFC3339, query.Get("from"))
+	if err != nil {
+		http.Error(w, "invalid from", http.StatusBadRequest)
+		return
+	}
+	
+	to, err := time.Parse(time.RFC3339, query.Get("to"))
+	if err != nil {
+		http.Error(w, "invalid to", http.StatusBadRequest)
+		return
+	}
+	
+	if !to.After(from) {
+		http.Error(w, "from must be before to", http.StatusBadRequest)
+		return
+	}
+
 	var conflict bool
 	storage.DB.QueryRow(`
 		SELECT EXISTS(
